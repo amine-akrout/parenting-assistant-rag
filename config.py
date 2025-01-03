@@ -9,6 +9,9 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
+    # Open AI API settings
+    OPENAI_API_KEY: SecretStr | None = None
+
     # Data settings
     RAW_DATA_PATH: str = "data/QueryResults.csv"
     PROCESSED_DATA_PATH: str = "preprocessed_parenting_data.csv"
