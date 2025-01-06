@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     # Open AI API settings
     OPENAI_API_KEY: SecretStr | None = None
 
+    # Lanfuse settings
+    LANGFUSE_SECRET_KEY: SecretStr | None = None
+    LANGFUSE_PUBLIC_KEY: SecretStr | None = None
+    LANGFUSE_HOST: SecretStr | None = None
+
     # Data settings
     RAW_DATA_PATH: str = "data/QueryResults.csv"
     PROCESSED_DATA_PATH: str = "preprocessed_parenting_data.csv"
