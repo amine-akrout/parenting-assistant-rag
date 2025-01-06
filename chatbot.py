@@ -6,6 +6,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 
 from config import settings
+from monitoring import create_langfuse_handler
 
 
 # Step 1: Load the FAISS index and retriever
@@ -68,11 +69,16 @@ def chatbot_response(user_query, retriever, qa_chain):
     Returns:
         str: The chatbot's response.
     """
+    # create the langfuse handler
+    langfuse_handler = create_langfuse_handler()
+
     if not user_query.strip():
         return "Please ask a valid question."
 
     # Get the response
-    result = qa_chain.invoke({"input": user_query})
+    result = qa_chain.invoke(
+        {"input": user_query}, config={"callbacks": [langfuse_handler]}
+    )
     return result["answer"]
 
 
