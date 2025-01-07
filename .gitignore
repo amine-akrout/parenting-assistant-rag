@@ -19,3 +19,5 @@ data/
 
 # env files
 .env
+
+evaluation.py

@@ -1,5 +1,7 @@
 from operator import itemgetter
 
+from langchain.cache import InMemoryCache
+from langchain.globals import set_llm_cache
 from langchain.prompts import PromptTemplate
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.schema.output_parser import StrOutputParser
@@ -36,14 +38,12 @@ def load_retriever():
     ov_model = OVModelForSequenceClassification.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    # 3. Create your reranker.
-    #    The key difference is including `model_kwargs={}` to avoid Pydantic's Field issue.
     ov_compressor = OpenVINOReranker(
         model_name_or_path=model_name,
         ov_model=ov_model,
         tokenizer=tokenizer,
         top_n=3,
-        model_kwargs={},  # <--- This ensures **model_kwargs is a normal dict, not a Field
+        model_kwargs={},
     )
 
     # Add Cross Encoder Reranker
@@ -71,14 +71,31 @@ def create_chatbot_chain(retriever):
     )
 
     # Initialize LLM
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    set_llm_cache(InMemoryCache())
+    llm = ChatOpenAI(
+        model=settings.LLM_MODEL_NAME, temperature=0, max_tokens=100, cache=True
+    )
+
+    def format_docs(docs):
+        # return "\n".join([doc.page_content for doc in docs])
+        answer_bodies = []
+        for doc in docs:
+            content = doc.page_content
+            if "AnswerBody:" in content:
+                # Extract the AnswerBody content
+                answer_start = content.find("AnswerBody:") + len("AnswerBody:")
+                answer_body = content[answer_start:].strip()
+                answer_bodies.append(answer_body)
+        return "\n\n".join(answer_bodies)
 
     # Create chain to combine documents
     qa_chain = (
-        {
-            "context": (lambda x: x["question"]) | retriever,
-            "question": itemgetter("question"),
-        }
+        RunnableParallel(
+            {
+                "context": (lambda x: x["question"]) | retriever | format_docs,
+                "question": itemgetter("question"),
+            }
+        )
         | PROMPT
         | llm
         | StrOutputParser()

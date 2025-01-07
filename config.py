@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # CROSS_ENCODER_MODEL_NAME: str = "BAAI/bge-reranker-base"
     CROSS_ENCODER_MODEL_NAME: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
+    # LLM settings
+    LLM_MODEL_NAME: str = "gpt-4o-mini"
+
     FAISS_INDEX_PATH: str = "faiss_index.faiss"
 
     # Logging settings
