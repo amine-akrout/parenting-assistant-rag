@@ -12,6 +12,7 @@ data/
 *.csv
 *.faiss
 *.pkl
+*.pickle
 
 
 # logs

@@ -1,14 +1,19 @@
-from operator import itemgetter
+"""
+This module implements a chatbot for assisting parents with their questions using
+a retrieval-based approach.
+"""
+
+import pickle
 
 from langchain.cache import InMemoryCache
 from langchain.globals import set_llm_cache
 from langchain.prompts import PromptTemplate
-from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers import ContextualCompressionRetriever, EnsembleRetriever
 from langchain.schema.output_parser import StrOutputParser
 from langchain_community.document_compressors.openvino_rerank import OpenVINOReranker
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from optimum.intel.openvino import OVModelForSequenceClassification
 from transformers import AutoTokenizer
@@ -17,10 +22,11 @@ from config import settings
 from monitoring import create_langfuse_handler
 
 
+# pylint: disable=W0621,C0103
 # Step 1: Load the FAISS index and retriever
 def load_retriever():
     """
-    Load the FAISS retriever.
+    Load the FAISS and BM25 retrievers.
     """
     embeddings_model = HuggingFaceEmbeddings(model_name=settings.EMBEDDINGS_MODEL_NAME)
     vector_store = FAISS.load_local(
@@ -28,14 +34,27 @@ def load_retriever():
         embeddings_model,
         allow_dangerous_deserialization=True,
     )
-    base_retriever = vector_store.as_retriever(
+    embedding_retriever = vector_store.as_retriever(
         search_type="similarity",
-        search_kwargs={"k": 10, "lambda_mult": 0.99, "fetch_k": 50},
+        search_kwargs={"k": settings.FAISS_TOP_K},
+    )
+
+    # Load the BM25 Retriever
+    with open(settings.BM25_INDEX_PATH, "rb") as file:
+        bm25_retriever = pickle.load(file)
+    bm25_retriever.k = settings.BM25_TOP_K
+
+    # Create an ensemble retriever
+
+    base_retriever = EnsembleRetriever(
+        retrievers=[embedding_retriever, bm25_retriever],
+        weights=settings.RETRIEVER_WEIGHTS,
+        top_k=settings.RETTRIEVER_TOP_K,
     )
 
     model_name = settings.CROSS_ENCODER_MODEL_NAME
 
-    ov_model = OVModelForSequenceClassification.from_pretrained(model_name)
+    ov_model = OVModelForSequenceClassification.from_pretrained(model_name, export=True)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     ov_compressor = OpenVINOReranker(
@@ -60,13 +79,14 @@ def create_chatbot_chain(retriever):
     Create a retrieval chain-based chatbot.
     """
     # Define the prompt template
-    prompt_template = """You are a knowledgeable and empathetic assistant helping parents with their questions.
+    prompt_template = """You are a knowledgeable and empathetic assistant helping parents with
+    their questions.
 
     {context}
 
     Question: {question}
     Answer:"""
-    PROMPT = PromptTemplate(
+    prompt = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )
 
@@ -93,10 +113,10 @@ def create_chatbot_chain(retriever):
         RunnableParallel(
             {
                 "context": (lambda x: x["question"]) | retriever | format_docs,
-                "question": itemgetter("question"),
+                "question": RunnablePassthrough(),
             }
         )
-        | PROMPT
+        | prompt
         | llm
         | StrOutputParser()
     )
@@ -104,7 +124,7 @@ def create_chatbot_chain(retriever):
 
 
 # Step 3: Chatbot Function
-def chatbot_response(question, retriever, qa_chain):
+def chatbot_response(question, qa_chain):
     """
     Get a chatbot response for a given query.
 
@@ -138,5 +158,5 @@ if __name__ == "__main__":
     question = "How do I get my child to sleep"
     question = "How do I get my child to eat vegetables"
     question = "How do I get my child to stop hitting"
-    response = chatbot_response(question, retriever, qa_chain)
+    response = chatbot_response(question, qa_chain)
     print(f"User: {question}\nChatbot: {response}")

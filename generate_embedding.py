@@ -1,6 +1,10 @@
+import os
+import pickle
+
 from langchain.vectorstores import FAISS
 from langchain_community.document_loaders.csv_loader import CSVLoader
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.retrievers import BM25Retriever
 from loguru import logger
 
 from config import settings
@@ -56,7 +60,22 @@ def generate_and_index_embeddings(data, embeddings_model, faiss_index_path):
         raise e
 
 
-# Step 4: Main Function
+# Step 4: Generate BM25 Index
+def generate_bm25_index(data, file_path=settings.BM25_INDEX_PATH):
+    """
+    Generate BM25 index for question-answer pairs.
+    """
+    if not os.path.exists(file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    else:
+        logger.info("Generating BM25 index...")
+    bm25_retriever = BM25Retriever.from_documents(documents=data)
+    with open(file_path, "wb") as f:
+        pickle.dump(bm25_retriever, f)
+    logger.info(f"BM25 index saved to {file_path}")
+
+
+# Step 5: Main Function
 def embed_qa_data():
     """
     Main function to load, preprocess, and save the parenting dataset.
@@ -69,10 +88,9 @@ def embed_qa_data():
     logger.add(
         "embedding_generation.log", level="INFO", format="{time} {level} {message}"
     )
-
+    data = load_dataset(input_file_path)
     try:
         logger.info("Starting embedding generation and FAISS indexing pipeline.")
-        data = load_dataset(input_file_path)
         embeddings_model = initialize_embeddings_model()
         generate_and_index_embeddings(data, embeddings_model, faiss_index_path)
         logger.info(
@@ -80,6 +98,13 @@ def embed_qa_data():
         )
     except Exception as e:
         logger.exception("Error in embedding generation and FAISS indexing pipeline.")
+
+    try:
+        logger.info("Starting BM25 index generation pipeline.")
+        generate_bm25_index(data)
+        logger.info("BM25 index generation pipeline completed successfully.")
+    except Exception as e:
+        logger.exception("Error in BM25 index generation pipeline.")
 
 
 # Main Function

@@ -31,8 +31,19 @@ class Settings(BaseSettings):
 
     # LLM settings
     LLM_MODEL_NAME: str = "gpt-4o-mini"
+    LLM_TEMPERATURE: float = 0
+    LLM_MAX_TOKENS: int = 100
 
     FAISS_INDEX_PATH: str = "faiss_index.faiss"
+    BM25_INDEX_PATH: str = "bm25/bm25_index.pkl"
+
+    FAISS_TOP_K: int = 5
+    BM25_TOP_K: int = 5
+
+    RETTRIEVER_TOP_K: int = 10
+    RETRIEVER_WEIGHTS: list[float] = [0.5, 0.5]
+
+    COMPRESSOR_TOP_K: int = 3
 
     # Logging settings
     LOGGING_LEVEL: str = "INFO"
