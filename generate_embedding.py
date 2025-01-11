@@ -1,3 +1,8 @@
+"""
+This script generates embeddings for a parenting dataset and indexes them using FAISS and BM25.
+
+"""
+
 import os
 import pickle
 
@@ -10,6 +15,7 @@ from loguru import logger
 from config import settings
 
 
+# pylint: disable=C0103,W0718
 # Step 1: Load the Dataset
 def load_dataset(file_path):
     """
@@ -70,8 +76,8 @@ def generate_bm25_index(data, file_path=settings.BM25_INDEX_PATH):
     else:
         logger.info("Generating BM25 index...")
     bm25_retriever = BM25Retriever.from_documents(documents=data)
-    with open(file_path, "wb") as f:
-        pickle.dump(bm25_retriever, f)
+    with open(file_path, "wb") as file:
+        pickle.dump(bm25_retriever, file)
     logger.info(f"BM25 index saved to {file_path}")
 
 
