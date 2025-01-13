@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from src.core.chatbot import chatbot_response, create_chatbot_chain, load_retriever
@@ -24,16 +25,12 @@ class QuestionRequest(BaseModel):
     question: str
 
 
-class ChatResponse(BaseModel):
-    answer: str
-
-
-@router.post("/", response_model=ChatResponse)
+@router.post("/", response_model=JSONResponse)
 def get_chat_response(request: QuestionRequest):
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Invalid question.")
     try:
         response = chatbot_response(request.question, qa_chain)
-        return ChatResponse(answer=response)
+        return JSONResponse(content={"question": request.question, "answer": response})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
