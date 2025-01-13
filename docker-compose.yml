@@ -37,6 +37,38 @@ services:
     volumes:
       - database_data:/var/lib/postgresql/data
 
+  clean-data:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m src.data.clean_data
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/data/ProcessedData.csv"]
+      interval: 20s
+      retries: 6
+
+  preprocess:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m src.core.embedding
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/data/faiss_index.faiss"]
+      interval: 20s
+      retries: 6
+    volumes:
+      - ./data:/app/data
+
+  chatbot-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - preprocess
+
 volumes:
   database_data:
     driver: local

@@ -7,11 +7,11 @@ import os
 import pickle
 import sys
 
-from langchain.cache import InMemoryCache
 from langchain.globals import set_llm_cache
 from langchain.prompts import PromptTemplate
 from langchain.retrievers import ContextualCompressionRetriever, EnsembleRetriever
 from langchain.schema.output_parser import StrOutputParser
+from langchain_community.cache import InMemoryCache
 from langchain_community.document_compressors.openvino_rerank import OpenVINOReranker
 from langchain_community.vectorstores import FAISS
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
@@ -22,8 +22,8 @@ from nemoguardrails.integrations.langchain.runnable_rails import RunnableRails
 from optimum.intel.openvino import OVModelForSequenceClassification
 from transformers import AutoTokenizer
 
-from config import settings
-from monitoring import create_langfuse_handler
+from src.config import settings
+from src.monitoring.monitoring import create_langfuse_handler
 
 # pylint: disable=W0621,C0103
 
@@ -125,7 +125,7 @@ def create_chatbot_chain(retriever):
         | llm
         | StrOutputParser()
     )
-    config = RailsConfig.from_path("./guardrail")
+    config = RailsConfig.from_path(settings.GUARDRAIL_SETTINGS_DIR)
     guardrails = RunnableRails(config, input_key="question")
     chain_with_guardrails = guardrails | qa_chain
     return chain_with_guardrails
