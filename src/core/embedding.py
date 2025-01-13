@@ -12,7 +12,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.retrievers import BM25Retriever
 from loguru import logger
 
-from config import settings
+from src.config import settings
 
 
 # pylint: disable=C0103,W0718
@@ -115,4 +115,8 @@ def embed_qa_data():
 
 # Main Function
 if __name__ == "__main__":
+    # make the notebook run correctyly by setting the correct path
+    import sys
+
+    sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
     embed_qa_data()

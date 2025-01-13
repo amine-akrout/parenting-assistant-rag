@@ -1,6 +1,6 @@
 from langfuse.callback import CallbackHandler
 
-from config import settings
+from src.config import settings
 
 
 def create_langfuse_handler():

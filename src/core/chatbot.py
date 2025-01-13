@@ -3,7 +3,9 @@ This module implements a chatbot for assisting parents with their questions usin
 a retrieval-based approach.
 """
 
+import os
 import pickle
+import sys
 
 from langchain.cache import InMemoryCache
 from langchain.globals import set_llm_cache
@@ -156,6 +158,9 @@ def chatbot_response(question, qa_chain):
 
 
 if __name__ == "__main__":
+    # make the notebook run correctyly by setting the correct path
+    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
     retriever = load_retriever()
     qa_chain = create_chatbot_chain(retriever)
 

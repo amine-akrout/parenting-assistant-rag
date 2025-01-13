@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     """Project settings."""
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="allow"
+        env_file="./.env", env_file_encoding="utf-8", extra="allow"
     )
 
     # Open AI API settings
