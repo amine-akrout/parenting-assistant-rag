@@ -1,0 +1,16 @@
+# Define the main flow to handle input validation and responses
+define flow self_check_input
+  $allowed = execute self_check_input  
+
+  # Conditional handling based on the self-check result
+  if not $allowed
+    bot refuse_to_respond  
+    stop  
+    
+  # If allowed, proceed to generate a response
+  execute respond
+  stop
+
+# Define the refusal flow for non-parenting queries
+define bot refuse_to_respond
+  "I'm sorry, but I can only respond to parenting-related topics. Please rephrase your question to focus on parenting."

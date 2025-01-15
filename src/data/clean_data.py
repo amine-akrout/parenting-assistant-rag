@@ -1,9 +1,12 @@
 import os
+import warnings
 
 import pandas as pd
 from loguru import logger
 
 from src.config import settings
+
+warnings.filterwarnings("ignore")
 
 
 # Step 1: Load the Dataset

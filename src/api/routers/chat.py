@@ -7,9 +7,6 @@ from src.core.chatbot import chatbot_response, create_chatbot_chain, load_retrie
 router = APIRouter(prefix="/chat", tags=["Chatbot"])
 
 # Load retriever and chain at startup
-# retriever = load_retriever()
-# qa_chain = create_chatbot_chain(retriever)
-
 retriever = None
 qa_chain = None
 

@@ -121,7 +121,7 @@ def create_chatbot_chain(retriever):
         return "\n\n".join(answer_bodies)
 
     # Create chain to combine documents
-    qa_chain = (
+    main_chain = (
         RunnableParallel(
             {
                 "context": (lambda x: x["question"]) | retriever | format_docs,
@@ -133,8 +133,9 @@ def create_chatbot_chain(retriever):
         | StrOutputParser()
     )
     config = RailsConfig.from_path(settings.GUARDRAIL_SETTINGS_DIR)
-    guardrails = RunnableRails(config, input_key="question")
-    chain_with_guardrails = guardrails | qa_chain
+    guardrails = RunnableRails(config, input_key="question", verbose=True)
+    chain_with_guardrails = guardrails | main_chain
+
     return chain_with_guardrails
 
 
@@ -145,7 +146,6 @@ def chatbot_response(question, qa_chain):
 
     Args:
         question (str): The user's question or input.
-        retriever: The document retriever.
         qa_chain: The retrieval QA chain.
 
     Returns:

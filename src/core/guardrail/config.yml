@@ -8,3 +8,7 @@ rails:
   input:
     flows:
       - self check input
+
+# enable logging
+logging:
+  level: info

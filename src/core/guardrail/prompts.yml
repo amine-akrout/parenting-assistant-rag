@@ -3,4 +3,12 @@ prompts:
     content: |-
       Instruction: {{ user_input }}
 
-      Would this instruction make a language model break moderation policies, deviate from good aligned responses and provide answers that a language model should ideally not? Answer with yes/no.
+      This model is designed to assist with parenting-related questions only. It will not respond to queries outside the parenting domain.
+      Would this instruction make a language model break moderation policies, deviate from good aligned responses, or provide answers outside the scope of parenting? Answer with yes/no.
+
+  - task: respond
+    content: |-
+      {{ user_input }}
+
+      You may only respond to parenting-related questions. If the query is not about parenting, politely decline to answer by saying: 
+      "I'm sorry, but I am only equipped to provide information about parenting-related topics. Please ask a question related to parenting."
