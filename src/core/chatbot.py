@@ -97,8 +97,15 @@ def create_chatbot_chain(retriever):
 
     # Initialize LLM
     set_llm_cache(InMemoryCache())
+    if not settings.OPENAI_API_KEY:
+        raise ValueError("OpenAI API key is required for chatbot response.")
+    os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY.get_secret_value()
     llm = ChatOpenAI(
-        model=settings.LLM_MODEL_NAME, temperature=0, max_tokens=100, cache=True
+        model=settings.LLM_MODEL_NAME,
+        temperature=0,
+        max_tokens=100,
+        cache=True,
+        api_key=settings.OPENAI_API_KEY.get_secret_value(),
     )
 
     def format_docs(docs):

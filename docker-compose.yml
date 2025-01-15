@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   langfuse-server:
     image: ghcr.io/langfuse/langfuse:sha-23150b6
@@ -44,22 +46,25 @@ services:
     command: python -m src.data.clean_data
     volumes:
       - ./data:/app/data
-    healthcheck:
-      test: ["CMD", "test", "-f", "/app/data/ProcessedData.csv"]
-      interval: 20s
-      retries: 6
+    depends_on:
+      db:
+        condition: service_healthy
 
   preprocess:
     build:
       context: .
       dockerfile: Dockerfile
     command: python -m src.core.embedding
-    healthcheck:
-      test: ["CMD", "test", "-f", "/app/data/faiss_index.faiss"]
-      interval: 20s
-      retries: 6
+    depends_on:
+      clean-data:
+        condition: service_completed_successfully
     volumes:
       - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/data/indexes/faiss_index.faiss"]
+      interval: 5s
+      retries: 5
+      start_period: 10s
 
   chatbot-api:
     build:
@@ -67,7 +72,12 @@ services:
       dockerfile: Dockerfile
     command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
     depends_on:
-      - preprocess
+      preprocess:
+        condition: service_completed_successfully
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
 
 volumes:
   database_data:

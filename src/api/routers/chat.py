@@ -25,7 +25,7 @@ class QuestionRequest(BaseModel):
     question: str
 
 
-@router.post("/", response_model=JSONResponse)
+@router.post("/", response_model=dict)
 def get_chat_response(request: QuestionRequest):
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Invalid question.")

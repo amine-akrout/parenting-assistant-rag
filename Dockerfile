@@ -11,10 +11,11 @@ WORKDIR /app
 
 # Copy the dependencies file to the working directory
 COPY requirements.txt .
-
-# Install any dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-# CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
 
+# Copy project files
+COPY . .
+
+
+# Default command for preprocessing
 CMD ["python", "-m", "src.data.clean_data"]
