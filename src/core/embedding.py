@@ -95,22 +95,30 @@ def embed_qa_data():
         "embedding_generation.log", level="INFO", format="{time} {level} {message}"
     )
     data = load_dataset(input_file_path)
-    try:
-        logger.info("Starting embedding generation and FAISS indexing pipeline.")
-        embeddings_model = initialize_embeddings_model()
-        generate_and_index_embeddings(data, embeddings_model, faiss_index_path)
-        logger.info(
-            "Embedding generation and FAISS indexing pipeline completed successfully."
-        )
-    except Exception as e:
-        logger.exception("Error in embedding generation and FAISS indexing pipeline.")
 
-    try:
-        logger.info("Starting BM25 index generation pipeline.")
-        generate_bm25_index(data)
-        logger.info("BM25 index generation pipeline completed successfully.")
-    except Exception as e:
-        logger.exception("Error in BM25 index generation pipeline.")
+    if os.path.exists(faiss_index_path):
+        logger.info(f"FAISS index already exists at {faiss_index_path}.")
+    else:
+        try:
+            logger.info("Starting embedding generation and FAISS indexing pipeline.")
+            embeddings_model = initialize_embeddings_model()
+            generate_and_index_embeddings(data, embeddings_model, faiss_index_path)
+            logger.info(
+                "Embedding generation and FAISS indexing pipeline completed successfully."
+            )
+        except Exception as e:
+            logger.exception(
+                "Error in embedding generation and FAISS indexing pipeline."
+            )
+    if os.path.exists(settings.BM25_INDEX_PATH):
+        logger.info(f"BM25 index already exists at {settings.BM25_INDEX_PATH}.")
+    else:
+        try:
+            logger.info("Starting BM25 index generation pipeline.")
+            generate_bm25_index(data)
+            logger.info("BM25 index generation pipeline completed successfully.")
+        except Exception as e:
+            logger.exception("Error in BM25 index generation pipeline.")
 
 
 # Main Function

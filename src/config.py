@@ -3,8 +3,11 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -25,7 +28,7 @@ class Settings(BaseSettings):
     # Lanfuse settings
     LANGFUSE_SECRET_KEY: SecretStr | None = None
     LANGFUSE_PUBLIC_KEY: SecretStr | None = None
-    LANGFUSE_HOST: SecretStr | None = None
+    LANGFUSE_HOST: str = os.environ.get("LANGFUSE_HOST", "http://localhost:3000")
 
     # Data settings
     RAW_DATA_PATH: str = str(DATA_DIR / "QueryResults.csv")

@@ -24,3 +24,6 @@ data/
 .env
 
 evaluation.py
+
+# nemo guardrails
+/src/core/guardrail

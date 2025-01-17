@@ -96,6 +96,11 @@ def process_qa_data():
     # Configure loguru logger
     logger.add("preprocessing.log", level="INFO", format="{time} {level} {message}")
 
+    # if the cleaned data file already exists, skip the processing
+    if os.path.exists(output_file_path):
+        logger.info("Preprocessed data already exists. Skipping data processing.")
+        return
+
     try:
         logger.info("Starting data processing pipeline.")
         raw_data = load_dataset(input_file_path)
