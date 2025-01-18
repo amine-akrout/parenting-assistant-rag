@@ -1,3 +1,7 @@
+"""
+Chatbot API Router.
+"""
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from loguru import logger
@@ -16,6 +20,9 @@ langfuse_handler = None
 
 @router.on_event("startup")
 async def startup_event():
+    """
+    Load retriever and chatbot chain at startup.
+    """
     global retriever, qa_chain, langfuse_handler
     retriever = load_retriever()
     qa_chain = create_chatbot_chain(retriever)
@@ -25,11 +32,18 @@ async def startup_event():
 
 
 class QuestionRequest(BaseModel):
+    """
+    Request model for a question.
+    """
+
     question: str
 
 
 @router.post("/", response_model=dict)
 def get_chat_response(request: QuestionRequest):
+    """
+    Get a response to a question from the chatbot.
+    """
     if not request.question.strip():
         logger.info("question : ", request.question)
         raise HTTPException(status_code=400, detail="Invalid question.")
@@ -38,7 +52,9 @@ def get_chat_response(request: QuestionRequest):
         response = rag_response.get(
             "response", "Sorry, I don't have an answer for that."
         )
-        return JSONResponse(content={"question": request.question, "answer": response})
+        return JSONResponse(
+            content={"question": request.question, "answer": rag_response}
+        )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
