@@ -122,10 +122,10 @@ docker-compose down
 ---
 
 ## 📈 Performance Monitoring (Langfuse)
-Enable **Langfuse** for real-time monitoring:
-```bash
-export LANGFUSE_API_KEY=your-langfuse-key
-```
+Enable **Langfuse** for real-time monitoring: 
+
+📌 `http://localhost:3000`  
+
 View logs on **Langfuse Dashboard**.
 
 ---
