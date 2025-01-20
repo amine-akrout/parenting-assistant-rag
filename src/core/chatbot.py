@@ -7,7 +7,7 @@ import os
 import pickle
 import sys
 
-from langchain.globals import set_llm_cache
+from langchain.globals import set_debug, set_llm_cache
 from langchain.prompts import PromptTemplate
 from langchain.retrievers import ContextualCompressionRetriever, EnsembleRetriever
 from langchain.schema.output_parser import StrOutputParser
@@ -194,7 +194,7 @@ def create_chatbot_chain(retriever):
         RunnableParallel(
             {
                 "context": (lambda x: x["question"]) | retriever | format_docs,
-                "question": RunnablePassthrough(),
+                "question": lambda x: x["question"],
             }
         ).with_config(run_name="Retrieval")
         | prompt.with_config(run_name="Prompt")
@@ -217,11 +217,13 @@ def create_chatbot_chain(retriever):
         ),
     ).with_config(run_name="Routing")
 
-    # Full chain with routing
     full_chain = (
         RunnableLambda(llm_guard_input).with_config(run_name="LLM Guard input")
         | RunnablePassthrough()
-        .assign(routing_key=lambda x: x["routing_key"])
+        .assign(
+            routing_key=lambda x: x["routing_key"],
+            question=lambda x: x.get("question", ""),  # Extract only the question
+        )
         .with_config(run_name="Routing Key")
         | routing_chain.with_config(run_name="Routing")
     )
@@ -236,6 +238,7 @@ def chatbot_response(question: str, qa_chain, langfuse_handler=None):
     """
 
     # Run full pipeline with Langfuse monitoring
+    set_debug(True)
     response = qa_chain.invoke(
         {"question": question}, config={"callbacks": [langfuse_handler]}
     )
