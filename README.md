@@ -84,16 +84,13 @@ POSTGRES_USER=your_db_user
 POSTGRES_PASSWORD=your_db_password
 POSTGRES_DB=your_db_name
 OPENAI_API_KEY=your-openai-key
-FAISS_INDEX_PATH=./data/faiss_index.faiss
-BM25_INDEX_PATH=./data/bm25_index.pkl
-CROSS_ENCODER_MODEL_NAME=your-cross-encoder-model
 LANGFUSE_PUBLIC_KEY=your-langfuse-public-key
 LANGFUSE_SECRET_KEY=your-langfuse-secret-key
 ```
 
 ### 4️⃣ **Run the API Server**
 ```bash
-uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 ```
 
 ### 5️⃣ **Test the API**
