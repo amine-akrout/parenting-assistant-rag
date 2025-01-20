@@ -130,6 +130,16 @@ View logs on **Langfuse Dashboard**.
 
 ---
 
+## 🧪 Testing
+
+Run unit tests using **pytest**:
+
+```bash
+pytest tests/
+```
+
+---
+
 ## 🎯 Future Enhancements
 ✅ Add **multi-turn conversations** (memory support)  
 ✅ Implement **whisper model for speech-to-text**  
