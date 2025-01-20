@@ -135,7 +135,6 @@ View logs on **Langfuse Dashboard**.
 ✅ Implement **whisper model for speech-to-text**  
 ✅ Add **more retrieval sources (vector & hybrid search)**  
 ✅ Integrate **more LLM Guard features** (e.g., sentiment analysis)  
-✅ Add **Unit Tests** for API endpoints and core functions
 
 
 ---
