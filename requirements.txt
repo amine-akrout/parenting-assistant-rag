@@ -1,8 +1,8 @@
 datasets==3.2.0
 fastapi==0.115.6
-langchain==0.3.14
-langchain_community==0.3.27
-langchain_core==0.3.29
+langchain-core==0.3.66
+langchain-community==0.3.27
+langchain==0.3.2
 langchain_huggingface==0.1.2
 langchain_openai==0.3.0
 langfuse==2.57.5
