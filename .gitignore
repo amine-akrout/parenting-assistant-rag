@@ -3,6 +3,7 @@ __pycache__/
 
 # python env
 venv/
+venv_*/
 
 # python build
 build/
